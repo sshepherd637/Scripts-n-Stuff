@@ -10,11 +10,11 @@ right place!
 You will find a couple within this repository:
 
 1. AiiDA-tools
-- All scripts and functionality I have from dealing with AiiDA.
+	- All scripts I have from dealing with AiiDA. 
 
 2. Conversion scripts
-- Scripts to convert between niche machine learning format input files and generic ase accepted ones. 
+	- Scripts to convert between niche machine learning format input files and generic ase accepted ones. 
 
 3. Analytical scripts
-- Various analytical tools and scripts that I use, some frequently and others less so.
+	- Various analytical tools and scripts that I use, some frequently and others less so.
 
