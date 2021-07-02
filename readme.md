@@ -4,4 +4,11 @@ As such, some of the things contained within this repository are extremely niche
 computational science provenance tracking code intergration, or simply want some specific analytical tool to help sort or visualise your sparsification process. Then you've come to the
 right place!
 # Directories
+You will find a couple within this repository:
+## AiiDA-tools
+All scripts and functionality I have from dealing with AiiDA.
+## Conversion scripts
+Scripts to convert between niche machine learning format input files and generic ase accepted ones. 
+## Analytical scripts
+Various analytical tools and scripts that I use, some frequently and others less so.
 
