@@ -6,7 +6,7 @@
 
 # Using ASE, we can make this process pretty painless       
 from ase.io import read, write
-import os, sys
+import sys
 import numpy as np
 
 # Load the dataset as the first system argument
