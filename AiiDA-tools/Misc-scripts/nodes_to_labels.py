@@ -3,7 +3,11 @@
 # A quick script to convert a file with the pks of a group of nodes ( as output by verdi process list ) to a file with their labels.
 
 import os
-import aiida
+from aiida.orm import load_node
+from aiida import load_profile
+
+# specify the profile we are working within. 
+load_profile('samshepherd')
 
 # specify the node file path
 node_file = os.path.join(os.getcwd(), 'nodes')
