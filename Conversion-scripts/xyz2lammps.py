@@ -38,6 +38,6 @@ new_file.writelines('Atoms\n\n')
 
 for i in range(len(positions)):
     positions_list = [i+1, species_2_assigned[chemical_species[i]], positions[i][0], positions[i][1], positions[i][2]]
-    atom_line = '\t{0[0]:<2}{0[1]:>3}{0[2]:>20}{0[3]:>20}{0[3]:>20}\n'.format(positions_list)
+    atom_line = '\t{0[0]:<2}{0[1]:>3}{0[2]:>20}{0[3]:>20}{0[4]:>20}\n'.format(positions_list)
     new_file.writelines(atom_line)
 
