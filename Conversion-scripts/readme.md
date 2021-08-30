@@ -6,7 +6,8 @@ To run these conversion scripts, pass the file to convert as a command line argu
 
 #### MDCombine.py
 
-This file is used to combine the results of i-pi driven molecular dynamics using the lammps engine coupled with the **fix-nnp** command.
+This file is used to combine the results of i-pi driven molecular dynamics using the lammps engine coupled with the **fix-nnp** command and takes two command line arguments, the simulation file prefix, (denoted `SomePrefix`) as `-p` and the number of atoms in each frame as `-a`.
+
 As such, this file must be run in a directory where the output of these simulations exists, in particular it needs access to...
 1. `SomePrefix.for_0.xyz` : the file containing all the forces (xyz based).
 2. `SomePrefix.pos_0.pdb` : the file containing all the cell parameters and positions (pdb based).
