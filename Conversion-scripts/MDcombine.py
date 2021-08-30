@@ -29,7 +29,10 @@ parser.add_argument('-p', metavar='simulation prefix', type=str, help='simulatio
 parser.add_argument('-a', metavar='atoms', type=int, help='The number of atoms within the original simulation frame')
 args = parser.parse_args()
 
-lmp_file = 'lmp_' + args.p.split('_')[1] + '.out'
+try:
+    lmp_file = 'lmp.out'    
+except:
+    lmp_file = 'lmp_' + args.p.split('_')[1] + '.out'
 pdb_frames = args.p + '.pos_0.pdb'
 for_frames = args.p + '.for_0.xyz'
 nAtoms = args.a 
