@@ -36,7 +36,10 @@ def atom_writer(frame):
 species_dict = { # add to as required
     1 : 'H',
     8 : 'O',
+   13 : 'Al',
+   14 : 'Si',
 }
+
 # Work with each frame in a for loop, iterate and print as required
 for i in range(len(frames)):
     newfile.writelines(f'begin\ncomment -> Created by the xyz2n2p2 python script\n')
