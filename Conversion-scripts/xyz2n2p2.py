@@ -26,7 +26,10 @@ def lattice_writer(frame):
 def atom_writer(frame):
     species = frame.arrays['numbers']
     positions = frame.arrays['positions']
-    force = frame.arrays['force']
+    try:
+        force = frame.arrays['force']
+    except:
+        force = frame.arrays['forces']
     for i in range(species.shape[0]):
         newfile.writelines(f'atom {positions[i][0]} {positions[i][1]} {positions[i][2]} {species_dict[species[i]]} 0.0 0.0 {force[i][0]} {force[i][1]} {force[i][2]}\n') # 0.0 = charge as not implemented
 
