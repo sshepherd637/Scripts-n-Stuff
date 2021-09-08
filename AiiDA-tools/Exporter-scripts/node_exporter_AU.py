@@ -5,6 +5,8 @@ import os, sys
 import glob
 import aiida
 from aiida.orm import load_node
+from ase.io import read, write
+from ase.units import Bohr
 import numpy as np
 
 def listtostring(list):
@@ -78,8 +80,11 @@ for i in dir_names:
     print(f'adding the recalculated forces and energy of {label} to the new datafile')
 
 ## TO-DO reoptimize this script after some corrections are made to various conversions ##
+frames = read('DATAFILE_AU.xyz', ':')
+for frame in frames:
+    frame.set_cell(frame.cell / Bohr)
+    frame.set_positions(frame.positions / Bohr)
 
-        
-    
-    
-
+# overwrite the old frame file
+write('tmpFrames.xyz', frames)
+os.sys('mv tmpFrames.xyz DATAFILE_AU.xyz')
