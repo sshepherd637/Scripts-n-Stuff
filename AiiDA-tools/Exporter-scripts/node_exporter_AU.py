@@ -56,9 +56,8 @@ for i in dir_names:
                 shorter_line = lattice_line[:-4]
                 for jj in range(len(shorter_line)):
                     shorter_line[jj] = shorter_line[jj].replace('"', '')
-                shorter_line[0] = str(float(shorter_line[0].split('=')[-1]) / Bohr)
+                shorter_line[0] = f'Lattice="{str(float(shorter_line[0].split("=")[-1]) / Bohr)}'
                 shorter_line[1:9] = [str((float(x) / Bohr)) for x in shorter_line[1:9]]  
-                shorter_line[0] = f'Lattice="{shorter_line[1]}'
                 shorter_line[8] = f'{shorter_line[8]}"'
                 eV_str = 'energy=' + str(energy)
                 shorter_line.append(eV_str)
