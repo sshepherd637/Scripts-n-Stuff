@@ -12,7 +12,7 @@ def listtostring(list):
     return str1.join(list)
 
 # We need to create an appropriate loop to go into each directory
-dir_prefix = input('Input the directory prefix: ')
+dir_prefix = sys.argv[1]
 path_string = dir_prefix + '_*'
 dir_paths = os.path.join(os.getcwd(), path_string)
 dir_names = glob.glob(dir_paths)
@@ -42,7 +42,6 @@ for i in dir_names:
 # we now have the required files and arrays opened, so we can now rewrite the .xyz file
     # best to separate out the array sections until I rewrite the parser
     f_array = np.array(f_array)
-    # every entry in the force array is in a.u and hence needs to be converted to eV/A to be used with quip
     x_force, y_force, z_force = f_array[:,2], f_array[:,3], f_array[:,4]    
     for i, line in enumerate(xyz_data):
         if i == 0:
@@ -61,7 +60,10 @@ for i in dir_names:
                 lattice_str = listtostring(lattice_line)
                 datafile.writelines(f'pbc="T T T" {lattice_str}\n')
         if i >= 2 and i <= (int(natoms) + 1):
-            placeholder = i - 1
+            if f_array.shape[0] > int(natoms):
+                placeholder = i - 1
+            elif f_array.shape[0] == int(natoms):
+                placeholder = i - 2
             atom_line = line.split()
             del atom_line[4:]
             atom_line.append('%.9f'%(float(x_force[placeholder])))
@@ -75,10 +77,7 @@ for i in dir_names:
     # writing the new datafile 
     print(f'adding the recalculated forces and energy of {label} to the new datafile')
 
-
-
-    
-    
+## TO-DO reoptimize this script after some corrections are made to various conversions ##
 
         
     
