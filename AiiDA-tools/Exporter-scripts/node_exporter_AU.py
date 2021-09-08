@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # script to combine the calculated forces of a job and combine them with the original position file to rewrite the new position file to be used with the machine learning models.
 
+import time
 import os, sys
 import glob
 import aiida
@@ -53,11 +54,23 @@ for i in dir_names:
             lattice_line = line.split()
             if lattice_line[-1] == 'T"':
                 shorter_line = lattice_line[:-4]
+                for jj in range(len(shorter_line)):
+                    shorter_line[jj] = shorter_line[jj].replace('"', '')
+                shorter_line[0] = str(float(shorter_line[0].split('=')[-1]) / Bohr)
+                shorter_line[1:9] = [str((float(x) / Bohr)) for x in shorter_line[1:9]]  
+                shorter_line[0] = f'Lattice="{shorter_line[1]}'
+                shorter_line[8] = f'{shorter_line[8]}"'
                 eV_str = 'energy=' + str(energy)
                 shorter_line.append(eV_str)
                 datafile.writelines(f'pbc="T T T" {listtostring(shorter_line)}\n') 
             else:
                 del lattice_line[-1]
+                for jj in range(len(lattice_line)):
+                    lattice_line[jj] = shorter_line[jj].replace('"', '')
+                lattice_line[1] = str(float(lattice_line[0].split('=')[-1]) / Bohr)
+                lattice_line[1:10] = [str((float(x) / Bohr)) for x in lattice_line[1:9]]
+                lattice_line[1] = f'Lattice="{lattice_line[1]}'
+                lattice_line[9] = f'{lattice_line[9]}"'
                 lattice_line[-1] = lattice_line[-1] + str(energy)
                 lattice_str = listtostring(lattice_line)
                 datafile.writelines(f'pbc="T T T" {lattice_str}\n')
@@ -68,11 +81,12 @@ for i in dir_names:
                 placeholder = i - 2
             atom_line = line.split()
             del atom_line[4:]
+            atom_line[1:4] = [str(round((float(jj) / Bohr), 10)) for jj in atom_line[1:4]]
             atom_line.append('%.9f'%(float(x_force[placeholder])))
             atom_line.append('%.9f'%(float(y_force[placeholder])))
             atom_line.append('%.9f'%(float(z_force[placeholder])))
 
-            atom_str = '{0[0]:<2}{0[1]:>14}{0[2]:>14}{0[3]:>14}{0[4]:>20}{0[5]:>20}{0[6]:>20}'.format(atom_line)
+            atom_str = '{0[0]:<2}{0[1]:>18}{0[2]:>18}{0[3]:>18}{0[4]:>20}{0[5]:>20}{0[6]:>20}'.format(atom_line)
             datafile.writelines(f'{atom_str}\n')
 
 
@@ -80,11 +94,3 @@ for i in dir_names:
     print(f'adding the recalculated forces and energy of {label} to the new datafile')
 
 ## TO-DO reoptimize this script after some corrections are made to various conversions ##
-frames = read('DATAFILE_AU.xyz', ':')
-for frame in frames:
-    frame.set_cell(frame.cell / Bohr)
-    frame.set_positions(frame.positions / Bohr)
-
-# overwrite the old frame file
-write('tmpFrames.xyz', frames)
-os.sys('mv tmpFrames.xyz DATAFILE_AU.xyz')
