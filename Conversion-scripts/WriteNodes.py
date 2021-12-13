@@ -101,7 +101,6 @@ def mainFunc(args):
         os.system('mv tmp result.xyz')
         newFrame = read('result.xyz')
         os.system('rm result.xyz')
-        newFrame.wrap(eps=1e-5)
         write('result.xyz', newFrame)
         newFrames.append(newFrame)
 
