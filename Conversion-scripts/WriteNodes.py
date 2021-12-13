@@ -110,8 +110,8 @@ def mainFunc(args):
             os.system('rm result.xyz')
         os.chdir(ParentWD)
 
-    write(f'Kaolinite_revPBE0D3_{os.path.basename(args.output)}.xyz', newFrames)
-    print(f'Kaolinite_revPBE0D3_{os.path.basename(args.output)}.xyz has been written.')
+    write(f'Kaolinite_revPBE0D3_{os.path.basename(args.output)}.{args.units}.xyz', newFrames)
+    print(f'Kaolinite_revPBE0D3_{os.path.basename(args.output)}.{args.units}.xyz has been written.')
 
 if __name__ == "__main__":
     mainFunc(args)
