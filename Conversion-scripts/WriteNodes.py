@@ -75,7 +75,7 @@ def mainFunc(args):
         ogFrame.set_cell(ogFrame.cell / posVar)
         ogFrame.set_positions(ogFrame.positions / posVar)
         # Edit frame to include new information
-        ogFrame.arrays['force'] = forArray * ForcVar
+        ogFrame.arrays['force'] = forArray.astype('float64') * ForcVar
         write('result.xyz', ogFrame)
     
         # Use a context manager to change the energy.
