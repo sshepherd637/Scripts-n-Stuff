@@ -24,3 +24,11 @@ Runs properly.
 #### xyz2n2p2.py
 
 This script does exactly what the name suggests it does, and converts xyz data to n2p2 readable formats.
+
+#### xyz2lammps.py
+
+This script converts xyz data to a lammps digestible format, as required by the n2p2 pair style within lammps. 
+
+#### xyz2ipi.py 
+
+This script just changes the lattice line within the xyz file to better suit the ipi wrapper.
