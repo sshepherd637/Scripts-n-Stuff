@@ -27,7 +27,7 @@ begin_time = datetime.datetime.now()
 parser = argparse.ArgumentParser(description='Combine simulation outputs.')
 parser.add_argument('-p', metavar='simulation prefix', type=str, help='simulation prefix used by i-pi to create the simulations')
 parser.add_argument('-a', metavar='atoms', type=int, help='The number of atoms within the original simulation frame')
-parser.add_argument('-v', metavar='velocity', type=bool, required=False, default=False, help='Add velocities to the output xyz file')
+parser.add_argument('-v', metavar='velocity', type=str, required=False, default='False', help='Add velocities to the output xyz file')
 args = parser.parse_args()
 
 try:
@@ -38,7 +38,7 @@ except:
 pdb_frames = args.p + '.pos_0.pdb'
 for_frames = args.p + '.for_0.xyz'
 
-if args.v == True:
+if args.v == 'True':
     vel_frames = args.p + 'vel_0.xyz'
 
 nAtoms = args.a 
@@ -91,7 +91,7 @@ for ii in range(0, numLines, (nAtoms+2)):
     TotForceArray[:,:,counter] = frameforceArray
     counter += 1
 
-if args.v == True:
+if args.v == 'True':
     filepath = os.path.join(os.getcwd(), vel_frames)
     print(f"""Attempting to read {vel_frames}...""")
     with open(filepath, 'r') as handle:
@@ -147,7 +147,7 @@ for ii, frame in enumerate(frames):
             except:
                 None
         frame.new_array('forces', TotForceArray[:,:,ii], dtype=float)
-        if args.v == True:
+        if args.v == 'True':
             frame.new_array('velocities', TotVelArray[:,:,ii], dtype=float)
         frame.set_cell(frame.cell / Bohr)
         frame.set_positions(frame.positions / Bohr)
