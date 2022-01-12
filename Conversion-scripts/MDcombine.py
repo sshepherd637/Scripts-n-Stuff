@@ -27,14 +27,20 @@ begin_time = datetime.datetime.now()
 parser = argparse.ArgumentParser(description='Combine simulation outputs.')
 parser.add_argument('-p', metavar='simulation prefix', type=str, help='simulation prefix used by i-pi to create the simulations')
 parser.add_argument('-a', metavar='atoms', type=int, help='The number of atoms within the original simulation frame')
+parser.add_argument('-v', metavar='velocity', type=bool, required=False, default=False, help='Add velocities to the output xyz file')
 args = parser.parse_args()
 
 try:
     lmp_file = 'lmp.out'    
 except:
     lmp_file = 'lmp_' + args.p.split('_')[1] + '.out'
+
 pdb_frames = args.p + '.pos_0.pdb'
 for_frames = args.p + '.for_0.xyz'
+
+if args.v == True:
+    vel_frames = args.p + 'vel_0.xyz'
+
 nAtoms = args.a 
 
 # Read the frames in their totality from the pdb file, try except block to catch ValueErrors
@@ -85,6 +91,24 @@ for ii in range(0, numLines, (nAtoms+2)):
     TotForceArray[:,:,counter] = frameforceArray
     counter += 1
 
+if args.v == True:
+    filepath = os.path.join(os.getcwd(), vel_frames)
+    print(f"""Attempting to read {vel_frames}...""")
+    with open(filepath, 'r') as handle:
+        velfile = handle.readlines()
+    TotVelArray = np.zeros((nAtoms,3,len(frames)))
+    counter = 0
+    numlines = len(frames)*(nAtoms+2)
+    print("""Creating velocity array...""")
+    for ii in range(0, numLines, (nAtoms+2)):
+        framevelArray = np.zeros((nAtoms, 3))
+        for jj in range((nAtoms+2)):
+            if len(velfile[ii+jj].split()) == 4:
+                velocities = [float(x) for x in velfile[ii+jj].split()[1:]]
+                framevelArray[jj-2,:] = forces
+        TotVelArray[:,:,counter] = framevelArray
+        counter += 1
+
 # with the positions and forces now accuately gathered, we need to use another file to get the energies out as predicted by the NNP
 print(f"""Reading {lmp_file} for frame energy...""")
 engList = os.popen(f"grep 'EW' {lmp_file}| wc -l")
@@ -123,6 +147,7 @@ for ii, frame in enumerate(frames):
             except:
                 None
         frame.new_array('forces', TotForceArray[:,:,ii], dtype=float)
+        frame.new_array('velocities', TotVelArray[:,:,ii], dtype=float)
         frame.set_cell(frame.cell / Bohr)
         frame.set_positions(frame.positions / Bohr)
         frame.info['energy'] = EnergyArray[ii]
@@ -130,9 +155,9 @@ print("""Writing output xyz file...""")
 write("MDSimulation.xyz", frames)
 
 # Finally, convert this data to n2p2 data and remove both the previous xyz file
-print("""Converting xyz output to n2p2 output...""")
-os.system('xyz2n2p2.py MDSimulation.xyz')
-os.system('rm MDSimulation.xyz')
+#print("""Converting xyz output to n2p2 output...""")
+#os.system('xyz2n2p2.py MDSimulation.xyz')
+#os.system('rm MDSimulation.xyz')
 
 # Finish script timing
 end_time = datetime.datetime.now()
