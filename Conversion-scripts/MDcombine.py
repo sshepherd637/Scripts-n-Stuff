@@ -147,7 +147,8 @@ for ii, frame in enumerate(frames):
             except:
                 None
         frame.new_array('forces', TotForceArray[:,:,ii], dtype=float)
-        frame.new_array('velocities', TotVelArray[:,:,ii], dtype=float)
+        if args.v == True:
+            frame.new_array('velocities', TotVelArray[:,:,ii], dtype=float)
         frame.set_cell(frame.cell / Bohr)
         frame.set_positions(frame.positions / Bohr)
         frame.info['energy'] = EnergyArray[ii]
