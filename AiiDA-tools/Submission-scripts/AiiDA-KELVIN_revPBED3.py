@@ -30,7 +30,6 @@ for d in dir_names:
     config_files = os.path.join(os.getcwd(), '*.xyz')
     config_file = glob.glob(config_files)[0]
     system_name = os.path.basename(config_file).split('.')[0]
-    print(system_name)
     system_file = system_name +'.xyz'
     structure = StructureData(ase=ase.io.read(config_file))
 
@@ -164,5 +163,6 @@ for d in dir_names:
 
 # Submit the calculation
     submit(builder)
+    print(f'Submitting {builder.metadata.label} to {builder.metadata.computer}...')
     os.chdir(pwd)
 
