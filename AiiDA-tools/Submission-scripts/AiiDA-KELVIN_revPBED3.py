@@ -75,10 +75,6 @@ for d in dir_names:
                         'XC_DERIV': 'SPLINE2',
                     },
                 },
-                'AUXILIARY_DENSITY_MATRIX_METHOD': {
-                    'METHOD': 'BASIS_PROJECTION',
-                    'ADMM_PURIFICATION_METHOD': 'NONE',
-                },
                 'QS': {
                     'EPS_DEFAULT': 1.0e-12,
                     'EPS_PGF_ORB': 1.0e-14,
