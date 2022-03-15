@@ -8,7 +8,10 @@
 - The potential File --- Stored as a node, hence callable
 - The structure File --- Unique per calculation, hence not callable
 - The DFTD3 data File --- Stored as a node, hence callable
-- The parameter Dictionary --- Unique per calculation, hence not callable """
+- The parameter Dictionary --- Unique per calculation, hence not callable 
+
+Additionally, a previous wavefunction is uploaded alongside these files as an attempt to speed up the computations
+- The wavefunction File -- Stored as a node, hence callable"""
 
 # Import the required modules to run this script
 import os, sys
@@ -41,6 +44,9 @@ for d in dir_names:
 
 # Definition of the DFTD3 parameter file used within this calculation
     DFTD3_file = load_node(label='DFTD3_DATA')
+
+# Previous wavefunction file stored and given VERY SPECIFIC NAMES
+    wfn_file = load_node(label='SAGPR_TEST-WFN')
 
 # Definition of the Parameter Dictionary
     params_dictionary = Dict(
@@ -155,6 +161,7 @@ for d in dir_names:
 	    'basis_sets_GTH' : basis_set,
 	    'pseudopotentials' : potential_file,
 	    'dftd3_data' : DFTD3_file,
+        'wfn_file' : wfn_file,
     }
 
 # Use builder.metadata to specify the additional settings of the calculation
@@ -167,9 +174,6 @@ for d in dir_names:
     builder.metadata.options.max_wallclock_seconds = 1 * 20 * 60
     builder.metadata.label = system_name + '_revPBED3'
     builder.metadata.description = f'Runner for {system_name} configuration files on Kelvin'
-
-# Use further metadata to copy the output wavefunction to the local system
-    builder.metadata.options.additional_retrieve_list = ['aiida-RESTART.wfn']
 
 # Submit the calculation
     submit(builder)
