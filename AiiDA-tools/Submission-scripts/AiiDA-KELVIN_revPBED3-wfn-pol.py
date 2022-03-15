@@ -93,11 +93,19 @@ for d in dir_names:
                         'EPS_SCF': 5.0e-7,
                     },
                 },
-            },
                 'PRINT': {
-		    'FORCES': {
-		        '_' : 'ON',
-		    },
+                    'MOMENTS': {
+                        'EACH': {
+                            'JUST_ENERGY',
+                        },
+                        'FILENAME': 'dpmom',
+                    },
+                },
+            },
+            'PRINT': {
+		        'FORCES': {
+		            '_' : 'ON',
+		        },
 	        },
 	        'SUBSYS': {
                     'TOPOLOGY': {
