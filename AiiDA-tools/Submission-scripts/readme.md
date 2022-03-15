@@ -16,9 +16,9 @@ The following scripts do a number of different things, depending on the suffix o
 
 ### List of suffixes:
 -
-`initwfn`: Returns the calculated wavefunction to store it for future calculations. 
+        `initwfn`: Returns the calculated wavefunction to store it for future calculations. 
 -
-`wfn`    : Uses a previously calculated wavefunction to attempt to cheapen the calculation.
+        `wfn`    : Uses a previously calculated wavefunction to attempt to cheapen the calculation.
 -
-`pol`    : Calculates the polarization of the system.
+        `pol`    : Calculates the polarization of the system.
 
