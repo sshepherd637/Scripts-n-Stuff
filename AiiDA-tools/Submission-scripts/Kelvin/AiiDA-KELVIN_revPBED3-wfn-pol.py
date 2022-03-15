@@ -102,7 +102,7 @@ for d in dir_names:
                 'PRINT': {
                     'MOMENTS': {
                         'EACH': {
-                            'JUST_ENERGY',
+                            '_': 'JUST_ENERGY',
                         },
                         'FILENAME': 'dpmom',
                     },
