@@ -35,6 +35,7 @@ try:
 except:
     lmp_file = 'lmp_' + args.p.split('_')[1] + '.out'
 
+eng_frames = args.p + '.out'
 pdb_frames = args.p + '.pos_0.pdb'
 for_frames = args.p + '.for_0.xyz'
 
@@ -110,25 +111,8 @@ if args.v == 'True':
         counter += 1
 
 # with the positions and forces now accuately gathered, we need to use another file to get the energies out as predicted by the NNP
-print(f"""Reading {lmp_file} for frame energy...""")
-engList = os.popen(f"grep 'EW' {lmp_file}| wc -l")
-engVal = engList.readlines()[0]
-filepath = os.path.join(os.getcwd(), lmp_file)
-print("""Creating temporary energy array...""")
-EnergyArray = np.zeros((int(engVal.strip())))
-with open(filepath, 'r') as lmpHandle:
-    lmpData = lmpHandle.readlines()
-
-counter = 0
-for ii, line in enumerate(lmpData):
-    if 'EW' in line and 'TS:          0' in line:
-        engVal = float(lmpData[ii+3].split()[-2])
-        EnergyArray[counter] = engVal
-        counter += 1
-    elif 'EW' in line and line.split()[6] != 0:
-        engVal = float(lmpData[ii+1].split()[-2])
-        EnergyArray[counter] = engVal
-        counter += 1
+print("""Creating energy array...""")
+EnergyArray = np.genfromtxt(eng_frames)
 
 # with the forces and the positions now together, we are going to edit the frames from the pdb file to be more suitable for our needs, i.e. positions and forces
 """
@@ -140,18 +124,18 @@ FORCES = ATOMIC UNITS
 pdbArrays = ['atomtypes', 'bfactor', 'occupancy', 'residuenames', 'residuenumbers']
 print("""Creating output xyz file...""")
 for ii, frame in enumerate(frames):
-    if ii < len(EnergyArray):
-        for anArray in pdbArrays:
-            try:
-                del frame.arrays[anArray]
-            except:
-                None
-        frame.new_array('forces', TotForceArray[:,:,ii], dtype=float)
-        if args.v == 'True':
-            frame.new_array('velocities', TotVelArray[:,:,ii], dtype=float)
-        frame.set_cell(frame.cell / Bohr)
-        frame.set_positions(frame.positions / Bohr)
-        frame.info['energy'] = EnergyArray[ii]
+    for anArray in pdbArrays:
+        try:
+            del frame.arrays[anArray]
+        except:
+            None
+    frame.new_array('forces', TotForceArray[:,:,ii], dtype=float)
+    if args.v == 'True':
+        frame.new_array('velocities', TotVelArray[:,:,ii], dtype=float)
+    frame.set_cell(frame.cell / Bohr)
+    frame.set_positions(frame.positions / Bohr)
+    frame.info['energy'] = EnergyArray[ii,4]
+
 print("""Writing output xyz file...""")
 write("MDSimulation.xyz", frames)
 
@@ -163,5 +147,4 @@ write("MDSimulation.xyz", frames)
 # Finish script timing
 end_time = datetime.datetime.now()
 runtime = end_time - begin_time
-print(f"""
-Script executed in {runtime}""")
+print(f"""\n...Script executed in {runtime}""")
