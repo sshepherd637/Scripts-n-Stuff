@@ -169,8 +169,6 @@ for d in dir_names:
     builder.metadata.options.queue_name = 'k2-hipri'
     builder.metadata.options.withmpi = True
     builder.metadata.options.resources = {'num_machines': 4, 'num_mpiprocs_per_machine': 24}
-    builder.metadata.options.max_memory_kb = 120000000
-    builder.metadata.options.parser_name = 'cp2k_advanced_parser'
     builder.metadata.options.max_wallclock_seconds = 1 * 20 * 60
     builder.metadata.label = system_name + '_revPBED3'
     builder.metadata.description = f'Runner for {system_name} configuration files on Kelvin'

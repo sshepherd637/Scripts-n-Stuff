@@ -8,10 +8,7 @@
 - The potential File --- Stored as a node, hence callable
 - The structure File --- Unique per calculation, hence not callable
 - The DFTD3 data File --- Stored as a node, hence callable
-- The parameter Dictionary --- Unique per calculation, hence not callable 
-
-Additionally, a previous wavefunction is uploaded alongside these files as an attempt to speed up the computations
-- The wavefunction File -- Stored as a node, hence callable"""
+- The parameter Dictionary --- Unique per calculation, hence not callable """
 
 # Import the required modules to run this script
 import os, sys
@@ -22,10 +19,9 @@ import numpy as np
 import aiida
 from aiida.engine import submit
 from aiida.orm import (Code, Dict, SinglefileData, StructureData)
-from aiida.orm import load_node, load_computer, load_code
 
 # using glob to enter each individual directory and get the system_name
-dir_paths = os.path.join(os.getcwd(), 'kaol_*')
+dir_paths = os.path.join(os.getcwd(), 'test*')
 pwd = os.getcwd()
 dir_names = glob.glob(dir_paths)
 for d in dir_names:
@@ -38,18 +34,14 @@ for d in dir_names:
 
 # Definition of the Basis-Sets file used within this calculation
     basis_set = load_node(label='GTH_BASIS_SET')
+    basis_admm = load_node(label='BASIS_ADMM')
 
 # Definition of the Potentials file used within this calculation
     potential_file = load_node(label='POTENTIAL')
 
 # Definition of the DFTD3 parameter file used within this calculation
     DFTD3_file = load_node(label='DFTD3_DATA')
-
-# Previous wavefunction file stored and given VERY SPECIFIC NAMES
-    wfn_file = load_node(label='SAGPR_TEST-WFN')
-
-# Specification of variables to be used throughout the builder settings below 
-    """ Currently blank """
+    T_C_G_file = load_node(label='T_C_G_DATA')
 
 # Definition of the Parameter Dictionary
     params_dictionary = Dict(
@@ -57,7 +49,7 @@ for d in dir_names:
         'FORCE_EVAL': {
             'METHOD': 'Quickstep',
             'DFT': {
-                'BASIS_SET_FILE_NAME': 'GTH_BASIS_SETS',
+                'BASIS_SET_FILE_NAME': ['GTH_BASIS_SETS', 'BASIS_ADMM'],
                 'POTENTIAL_FILE_NAME': 'POTENTIAL',
                 'MGRID': {
                         'CUTOFF': 400,
@@ -67,6 +59,25 @@ for d in dir_names:
                     'XC_FUNCTIONAL': {
                         'PBE': {
                             'PARAMETRIZATION': 'REVPBE',
+                            'SCALE_X': 0.75,
+                        },
+                    },
+                    'HF': {
+                        'FRACTION': 0.25,
+                        'SCREENING': {
+                            'EPS_SCHWARZ': 1.0E-6,
+                            'SCREEN_ON_INITIAL_P': 'FALSE',
+                        },
+                        'MEMORY': {
+                            'MAX_MEMORY': 40000,
+                            'EPS_STORAGE_SCALING': 0.1,
+                        },
+                        'INTERACTION_POTENTIAL': {
+                            'POTENTIAL_TYPE': 'TRUNCATED',
+                            'CUTOFF_RADIUS': 3.5,
+                            'T_C_G_DATA': 't_c_g.dat',
+                        },
+                        'HF_INFO': {
                         },
                     },
                     'VDW_POTENTIAL': {
@@ -83,9 +94,13 @@ for d in dir_names:
                         'XC_DERIV': 'SPLINE2',
                     },
                 },
+                'AUXILIARY_DENSITY_MATRIX_METHOD': {
+                    'METHOD': 'BASIS_PROJECTION',
+                    'ADMM_PURIFICATION_METHOD': 'NONE',
+                },
                 'QS': {
-                    'EPS_DEFAULT': 1.0e-12,
-                    'EPS_PGF_ORB': 1.0e-14,
+                    'EPS_DEFAULT': 1.0e-20,
+                    'EPS_PGF_ORB': 1.0e-40,
                     'EXTRAPOLATION': 'USE_GUESS',
                     'EXTRAPOLATION_ORDER': 5,
                 },
@@ -102,18 +117,11 @@ for d in dir_names:
                         'EPS_SCF': 5.0e-7,
                     },
                 },
-                'PRINT': {
-                    'MOMENTS': {
-                        'EACH': {
-                            '_': 'JUST_ENERGY',
-                        },
-                    },
-                },
             },
-            'PRINT': {
-		        'FORCES': {
-		            '_' : 'ON',
-		        },
+                'PRINT': {
+		    'FORCES': {
+		        '_' : 'ON',
+		    },
 	        },
 	        'SUBSYS': {
                     'TOPOLOGY': {
@@ -128,22 +136,22 @@ for d in dir_names:
                     'KIND': [
                         {
                             '_': 'O',
-                            'BASIS_SET': 'TZV2P-GTH',
+                            'BASIS_SET': ['TZV2P-GTH', 'AUX_FIT cpFIT3'],
                             'POTENTIAL': 'GTH-PBE-q6'
                         },
                         {
                             '_': 'H',
-                            'BASIS_SET': 'TZV2P-GTH',
+                            'BASIS_SET': ['TZV2P-GTH', 'AUX_FIT cpFIT3'],
                             'POTENTIAL': 'GTH-PBE-q1'
                         },
                         {
                             '_': 'Al',
-                            'BASIS_SET': 'DZVP-GTH',
+                            'BASIS_SET': ['DZVP-GTH', 'AUX_FIT cpFIT3'],
                             'POTENTIAL': 'GTH-PBE-q3'
                         },
                         {
                             '_': 'Si',
-                            'BASIS_SET': 'DZVP-GTH',
+                            'BASIS_SET': ['DZVP-GTH', 'AUX_FIT cpFIT3'],
                             'POTENTIAL': 'GTH-PBE-q4'
                         }
                     ],
@@ -161,24 +169,25 @@ for d in dir_names:
     builder.file = {
 	    system_name : structure,
 	    'basis_sets_GTH' : basis_set,
+            'basis_set_ADMM' : basis_admm,
 	    'pseudopotentials' : potential_file,
 	    'dftd3_data' : DFTD3_file,
-        'wfn_file' : wfn_file,
+            't_c_g_data' : T_C_G_file,
     }
 
 # Use builder.metadata to specify the additional settings of the calculation
     builder.metadata.computer = load_computer('kelvin')
     builder.metadata.options.queue_name = 'k2-hipri'
     builder.metadata.options.withmpi = True
-    builder.metadata.options.resources = {'num_machines': 4, 'num_mpiprocs_per_machine': 24}
+    builder.metadata.options.resources = {'num_machines': 5, 'num_mpiprocs_per_machine': 24}
     builder.metadata.options.max_memory_kb = 120000000
     builder.metadata.options.parser_name = 'cp2k_advanced_parser'
-    builder.metadata.options.max_wallclock_seconds = 1 * 20 * 60
-    builder.metadata.label = system_name + '_revPBED3'
+    builder.metadata.options.max_wallclock_seconds = 3 * 60 * 60
+    builder.metadata.label = system_name + '_revPBE0D3'
     builder.metadata.description = f'Runner for {system_name} configuration files on Kelvin'
 
-# Adding the dipole moments to the retrieve list
-    builder.metadata.options.additional_retrieve_list = ['aiida-moments-1_0.dat']
+# Use further metadata to copy the output wavefunction to the local system
+    builder.metadata.options.additional_retrieve_list = ['aiida-RESTART.wfn']
 
 # Submit the calculation
     submit(builder)

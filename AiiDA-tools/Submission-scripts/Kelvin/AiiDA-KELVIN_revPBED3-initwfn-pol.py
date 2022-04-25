@@ -98,7 +98,7 @@ for d in dir_names:
                         'EACH': {
                             '_': 'JUST_ENERGY',
                         },
-                        'FILENAME': 'dpmom',
+                        'FILENAME': '=moments.dat',
                     },
                 },
             },
@@ -169,7 +169,7 @@ for d in dir_names:
     builder.metadata.description = f'Runner for {system_name} configuration files on Kelvin'
 
 # Use further metadata to copy the output wavefunction to the local system
-    builder.metadata.options.additional_retrieve_list = ['aiida-RESTART.wfn']
+    builder.metadata.options.additional_retrieve_list = ['aiida-RESTART.wfn', 'moments.dat']
 
 # Submit the calculation
     submit(builder)

@@ -6,12 +6,9 @@
 """ In order for this script to operate, the following must be specified to the file and then to builder...
 - The basis_set File --- Stored as a node, hence callable
 - The potential File --- Stored as a node, hence callable
-- The structure File --- Unique per calculation, hence not callable
+- The structure File --- Unique per calculation and created within the file
 - The DFTD3 data File --- Stored as a node, hence callable
-- The parameter Dictionary --- Unique per calculation, hence not callable 
-
-Additionally, a previous wavefunction is uploaded alongside these files as an attempt to speed up the computations
-- The wavefunction File -- Stored as a node, hence callable"""
+- The parameter Dictionary --- Unique per calculation and created within the file """
 
 # Import the required modules to run this script
 import os, sys
@@ -19,22 +16,24 @@ import glob
 import ase.io
 import numpy as np
 
+# Import AiiDA
 import aiida
 from aiida.engine import submit
-from aiida.orm import (Code, Dict, SinglefileData, StructureData)
+from aiida.orm import Code, Dict, SinglefileData, StructureData
 from aiida.orm import load_node, load_computer, load_code
 
 # using glob to enter each individual directory and get the system_name
-dir_paths = os.path.join(os.getcwd(), 'kaol_*')
+dir_paths = os.path.join(os.getcwd(), 'kaol_*') # Change this part to refer to different directories
 pwd = os.getcwd()
 dir_names = glob.glob(dir_paths)
 for d in dir_names:
     os.chdir(d)
-    config_files = os.path.join(os.getcwd(), '*.xyz')
+    config_files = os.path.join(os.getcwd(), '*.xyz') # This gets the structure file 
     config_file = glob.glob(config_files)[0]
     system_name = os.path.basename(config_file).split('.')[0]
+    print(system_name)
     system_file = system_name +'.xyz'
-    structure = StructureData(ase=ase.io.read(config_file))
+    structure = StructureData(ase=ase.io.read(config_file)) # Creation of the AiiDA structure node
 
 # Definition of the Basis-Sets file used within this calculation
     basis_set = load_node(label='GTH_BASIS_SET')
@@ -44,12 +43,6 @@ for d in dir_names:
 
 # Definition of the DFTD3 parameter file used within this calculation
     DFTD3_file = load_node(label='DFTD3_DATA')
-
-# Previous wavefunction file stored and given VERY SPECIFIC NAMES
-    wfn_file = load_node(label='SAGPR_TEST-WFN')
-
-# Specification of variables to be used throughout the builder settings below 
-    """ Currently blank """
 
 # Definition of the Parameter Dictionary
     params_dictionary = Dict(
@@ -61,7 +54,6 @@ for d in dir_names:
                 'POTENTIAL_FILE_NAME': 'POTENTIAL',
                 'MGRID': {
                         'CUTOFF': 400,
-                        'REL_CUTOFF': 60,
                 },
                 'XC': {
                     'XC_FUNCTIONAL': {
@@ -102,18 +94,11 @@ for d in dir_names:
                         'EPS_SCF': 5.0e-7,
                     },
                 },
-                'PRINT': {
-                    'MOMENTS': {
-                        'EACH': {
-                            '_': 'JUST_ENERGY',
-                        },
-                    },
-                },
             },
-            'PRINT': {
-		        'FORCES': {
-		            '_' : 'ON',
-		        },
+                'PRINT': {
+		    'FORCES': {
+		        '_' : 'ON',
+		    },
 	        },
 	        'SUBSYS': {
                     'TOPOLOGY': {
@@ -155,33 +140,28 @@ for d in dir_names:
         })
 
 # Use the aiida method to construct this method by loading the appropriate code etc..
-    code = load_code('cp2k_code_update@kelvin')
+    code = load_code('cp2k_code@Young')
     builder = code.get_builder()
     builder.parameters = params_dictionary
     builder.file = {
-	    system_name : structure,
-	    'basis_sets_GTH' : basis_set,
+	    system_name: structure,
+        'basis_sets' : basis_set,
 	    'pseudopotentials' : potential_file,
-	    'dftd3_data' : DFTD3_file,
-        'wfn_file' : wfn_file,
+	    'dftd3_data' : DFTD3_file
     }
 
-# Use builder.metadata to specify the additional settings of the calculation
-    builder.metadata.computer = load_computer('kelvin')
-    builder.metadata.options.queue_name = 'k2-hipri'
-    builder.metadata.options.withmpi = True
-    builder.metadata.options.resources = {'num_machines': 4, 'num_mpiprocs_per_machine': 24}
-    builder.metadata.options.max_memory_kb = 120000000
+# Use builder.metadata to specify the additional settings of the calculation 
+### THIS PART IS EXTREMELY SYSTEM SPECIFIC ###
+    builder.metadata.computer = load_computer('Young')
+    builder.metadata.options.account = 'Gold'
+    builder.metadata.options.resources = {'parallel_env': 'mpi', 'tot_num_mpiprocs': 80}
     builder.metadata.options.parser_name = 'cp2k_advanced_parser'
     builder.metadata.options.max_wallclock_seconds = 1 * 20 * 60
     builder.metadata.label = system_name + '_revPBED3'
-    builder.metadata.description = f'Runner for {system_name} configuration files on Kelvin'
+    builder.metadata.description = f'Runner for {system_name} configuration files on Young'
 
-# Adding the dipole moments to the retrieve list
-    builder.metadata.options.additional_retrieve_list = ['aiida-moments-1_0.dat']
 
 # Submit the calculation
     submit(builder)
-    print(f'Submitting {builder.metadata.label} to {builder.metadata.computer}...')
     os.chdir(pwd)
 
