@@ -44,6 +44,12 @@ for d in dir_names:
 # Definition of the DFTD3 parameter file used within this calculation
     DFTD3_file = load_node(label='DFTD3_DATA')
 
+# Previous wavefunction file stored and given VERY SPECIFIC NAMES
+    wfn_file = load_node(label=' ')
+
+# Specification of variables to be used throughout the builder settings below
+    """ Currently blank """
+
 # Definition of the Parameter Dictionary
     params_dictionary = Dict(
 	    dict = {
@@ -145,9 +151,10 @@ for d in dir_names:
     builder.parameters = params_dictionary
     builder.file = {
 	    system_name: structure,
-        'basis_sets' : basis_set,
+            'basis_sets' : basis_set,
 	    'pseudopotentials' : potential_file,
-	    'dftd3_data' : DFTD3_file
+	    'dftd3_data' : DFTD3_file,
+            'wfn_file' : wfn_file
     }
 
 # Use builder.metadata to specify the additional settings of the calculation 
@@ -163,5 +170,6 @@ for d in dir_names:
 
 # Submit the calculation
     submit(builder)
+    print(f'Submitting {builder.metadata.label} to {builder.metadata.computer}...')
     os.chdir(pwd)
 

@@ -53,7 +53,7 @@ for d in dir_names:
                 'BASIS_SET_FILE_NAME': 'GTH_BASIS_SETS',
                 'POTENTIAL_FILE_NAME': 'POTENTIAL',
                 'MGRID': {
-                        'CUTOFF': 400,
+                    'CUTOFF': 400,
                 },
                 'XC': {
                     'XC_FUNCTIONAL': {
