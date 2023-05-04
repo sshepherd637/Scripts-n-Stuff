@@ -34,11 +34,16 @@ parser.add_argument('-s', type=bool, help='Automatic random sampling of extrapol
 # Define function to convert xyz file to readible string
 def Frame2Lines(frame, filename):
     try:
-        print("Attempting to find a suitable XYZ file...")
-        flname = f'{filename}.pos_0.xyz'
-    except:
-        print("No suitable XYZ file found... Attempting to find suitable PDB file")
-        flname = f'{filename}.pos_0.pdb'
+        print("Attempting to find a suitable datafile...\n")
+        if os.path.exists(os.path.join(os.getcwd(), f'{filename}.pos_0.xyz')):
+            flname = f'{filename}.pos_0.xyz'
+        elif os.path.exists(os.path.join(os.getcwd(), f'{filename}.pos_0.pdb')):
+            flname = f'{filename}.pos_0.pdb'
+        else:
+            raise ValueError('Cannot find XYZ or PDB based data file...\n')
+        print(f"Successfully found a suitable datafile...FILE = {flname}\n")
+    except (ValueError):
+        exit('Exiting, unable to find suitable datafile.')
         
     if flname.split('.')[-1] == 'xyz':
         start_line = (frame*274)+1
@@ -46,21 +51,23 @@ def Frame2Lines(frame, filename):
         quit_line = end_line + 1
         cmd = f"sed -n {start_line},{end_line}p;{quit_line}q {flname}"
         oframe = subprocess.run(cmd.split(), capture_output=True)
-        return oframe.stdout.decode('utf-8')
-
-    elif flname.split('.')[-1] == '.pdb':
+        output = oframe.stdout.decode('utf-8')
+        return output 
+    
+    elif flname.split('.')[-1] == 'pdb':
         start_line = (frame*275)+1
         end_line = (frame+1)*275
         quit_line = end_line + 1
         cmd = f"sed -n {start_line},{end_line}p;{quit_line}q {flname}"
         oframe = subprocess.run(cmd.split(), capture_output=True)
-        return oframe.stdout.decode('utf-8')
-        
+        output = oframe.stdout.decode('utf-8')
+        return output
 
 def Lines2XYZ(output):
     lines = output.splitlines()
     olines = []
     if len(lines) == 274:
+        print('entered this loop = 274')
         for line in lines:
             if '# CELL' in line:
                 cellpar = [float(x) for x in line.split()[2:8]]
@@ -75,12 +82,13 @@ def Lines2XYZ(output):
                 olines.append(fline)
         return olines   
     elif len(lines) == 275:
+        print('entered this loop = 275')
         for line in lines:
             if 'CRYST' in line:
                 cellpar = [float(x) for x in line.split()[1:7]]
                 cell = Cell.fromcellpar(cellpar)
                 newLine = f'Lattice="{cell[0][0]} {cell[0][1]} {cell[0][2]} {cell[1][0]} {cell[1][1]} {cell[1][2]} {cell[2][0]} {cell[2][1]} {cell[2][2]}" Properties=species:S:1:pos:R:3\n'
-                olines.append('272')
+                olines.append(f'272\n')
                 olines.append(newLine)
             elif 'ATOM' in line:
                 oline = line.split()
