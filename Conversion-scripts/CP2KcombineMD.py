@@ -16,6 +16,7 @@ parser.add_argument('-pos', type=str, help='Position file')
 parser.add_argument('-cell', type=str, help='Cell information')
 parser.add_argument('-forc', type=str, help='Force file')
 parser.add_argument('-natoms', type=int, help='Number of Atoms')
+parser.add_argument('-out', type=str, help='Output filename')
 args = parser.parse_args()
 
 # Create function to parse energy 
@@ -50,4 +51,4 @@ if __name__ == "__main__":
         del frame.info['E']
         frame.info['energy'] = energy
 
-    write('test.xyz', frames)
+    write(args.out, frames)
